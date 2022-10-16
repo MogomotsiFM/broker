@@ -19,7 +19,7 @@ b. A list of areas,
 c. An area and a range (Looking for a place around Montshioa, looking for a place near Mega City)
 
 ### Property type
-1, Commune,
+1. Commune,
 2. Room,
 3. Bachelor(a room with a kitchenette and in suite bathroom),
 4. 1 bedroom,
