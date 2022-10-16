@@ -14,9 +14,9 @@ Extract the location, property type and price from the post
 ### Location
 1. If the post is from a service provider then the location is a single point in an area
 2. If the post is from a prospective tenant the location may be:
-a. A single area,
-b. A list of areas,
-c. An area and a range (Looking for a place around Montshioa, looking for a place near Mega City)
+  a. A single area,
+  b. A list of areas,
+  c. An area and a range (Looking for a place around Montshioa, looking for a place near Mega City)
 
 ### Property type
 1. Commune,
