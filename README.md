@@ -31,17 +31,17 @@ Extract the location, property type and price from the post
 1. If the post is from a service provider then the price is a fixed value,
 2. If the post is from a prospective tenant then the price is a range.
 
-# Workflow
-## Train intent recognition model,
-## Train named entity recognition model?
-## Application
-- Get user input,
-- Determine intent,
-- Extract feature using NER,
-- IF Perspective tenant:
- + Search supplier DB
- + IF Supplier not found:
-  * Add request to prospective tenant DB
- + Return supplier list
-- IF property owner:
- + Add features to the supplier DB
+## Workflow
+- Train intent recognition model,
+- Train named entity recognition model?
+- Application
+    - Get user input,
+    - Determine intent,
+    - Extract feature using NER,
+    - IF Perspective tenant:
+        - Search supplier DB
+        - IF Supplier not found:
+            - Add request to prospective tenant DB
+        - Return supplier list
+    - IF property owner:
+        - Add features to the supplier DB
