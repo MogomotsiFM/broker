@@ -43,3 +43,7 @@ Extract the location, property type and price from the post
         - ELSE: Return supplier list
     - IF property owner:
         - Add supplier to DB
+## Tools
+- Python,
+- Rasa NLU,
+- BERT
