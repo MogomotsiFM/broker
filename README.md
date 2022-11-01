@@ -39,9 +39,9 @@ Extract the location, property type and price from the post
 - Determine intent,
 - Extract feature using NER,
 - IF Perspective tenant:
- - Search supplier DB
- - IF Supplier not found:
-  - Add request to prospective tenant DB
- - Return supplier list
+ + Search supplier DB
+ + IF Supplier not found:
+  * Add request to prospective tenant DB
+ + Return supplier list
 - IF property owner:
- - Add features to the supplier DB
+ + Add features to the supplier DB
