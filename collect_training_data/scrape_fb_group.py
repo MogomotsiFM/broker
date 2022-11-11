@@ -1,6 +1,12 @@
 import sys
 import time
 
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
+
 '''
 Without this import the pyppeteer package install the wrong version of 
 chromium in the wrong directory.
@@ -11,16 +17,10 @@ import pyppdf.patch_pyppeteer
 from requests_html import HTML
 from requests_html import HTMLSession
 
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.by import By
-
 
 def extract_replies(session, replies_url):
     r = session.get(replies_url)
-    time.sleep(10)
+    time.sleep(15)
 
     replies = r.html.find('div._2a_i')
 
@@ -35,14 +35,15 @@ def extract_replies(session, replies_url):
             list_replies.append(comment)
         else:
             try:
-                print("Could be an image. Facebook does text extraction.")
+                # print("Could be an image. Facebook does text extraction.")
                 img_tag = reply.find('a img', first=True)
                 comment = img_tag.attrs['alt'].split('"')[1]
 
                 # print(f'Reply: {comment}\n')
                 list_replies.append(comment)
             except Exception:
-                print('Fine, we can get more data elsewhere.')
+                print(f'\n{replies_url}')
+                # print('Fine, we can get more data elsewhere.')
 
     return list_replies
 
@@ -191,10 +192,11 @@ if __name__ == '__main__':
     Usage: python3 scrape_fb_group.py fb_username fb_password
     """
 
-    if len(sys.args) == 3:
+    if len(sys.argv) == 3:
         GROUP_ID = "353422322429171"
-        e_mail = sys.args[1]
-        password = sys.args[2]
+        e_mail = sys.argv[1]
+        password = sys.argv[2]
+        print(f'Username: {e_mail}    password: {password}')
 
         html = fetch_fb_group_data(e_mail, password, GROUP_ID)
 
@@ -220,6 +222,7 @@ if __name__ == '__main__':
             f.writelines([url+'\n\n' for url in reply_urls])
 
         for count, url in zip(num_replies, reply_urls):
+            print('Another one...')
             replies = extract_replies(session, url)
 
             file.writelines([r+'\n\n' for r in replies])
