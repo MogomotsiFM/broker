@@ -54,7 +54,7 @@ def find_location_name(processed_post, area_names):
     for start1, start2, end in zip(word_bounds, word_bounds[1:], word_bounds[2:]):
         w1 = processed_post[start1:start2-1]
         w2 = processed_post[start2:end-1]
-        if not w1.isupper():
+        if not w1.isupper() and len(w1) + len(w2) > 3:
             _, prob = process.extractOne(w1, area_names, scorer=fuzz.ratio)
 
             _, prob2 = process.extractOne(' '.join([w1, w2]), area_names, scorer=fuzz.token_sort_ratio)
@@ -75,9 +75,6 @@ def settle_possible_overlap(area_names_boundaries, new_bound):
     if len(area_names_boundaries) == 0:
         area_names_boundaries.append(new_bound)
         return
-
-    print(area_names_boundaries)
-    print(new_bound)
 
     last_start, last_end, last_prob = area_names_boundaries.pop()
     start, end, prob = new_bound
@@ -216,7 +213,7 @@ with open('training_data.txt', 'r', encoding='utf-16le') as file:
 
 i = 0
 with open('labeled_ner_training_data.txt', 'w', encoding='utf-16le') as file:
-    for post in [p for p in posts[0:1] if len(p) > 2]:
+    for post in [p for p in posts if len(p) > 2]:
         print(f'    {i}')
         i += 1
         processed_post    = preprocess(post)
@@ -224,6 +221,7 @@ with open('labeled_ner_training_data.txt', 'w', encoding='utf-16le') as file:
         processed_post, _ = price_re.subn('P_PRICE', processed_post, 100)
 
         processed_post = expand_units(processed_post)
+        processed_post, _ = re.compile(r',').subn(lambda m: ' , ', processed_post)
         processed_post = replace_location_with_ner_marker(processed_post, area_names)
 
         file.write(f'{post}')
