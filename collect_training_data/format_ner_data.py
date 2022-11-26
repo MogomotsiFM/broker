@@ -48,6 +48,8 @@ def find_start(processed_post):
 def find_location_name(processed_post, area_names):
     word_bounds = list(find_start(processed_post))
 
+    area_names_boundaries = []
+
     # We assume that each area name may have at most two words
     for start1, start2, end in zip(word_bounds, word_bounds[1:], word_bounds[2:]):
         w1 = processed_post[start1:start2-1]
@@ -58,21 +60,50 @@ def find_location_name(processed_post, area_names):
             _, prob2 = process.extractOne(' '.join([w1, w2]), area_names, scorer=fuzz.token_sort_ratio)
 
             if prob2 > prob and prob2 > 90:
-                return start1, end - 1
+                new_bounds = (start1, end-1, prob2)
+                settle_possible_overlap(area_names_boundaries, new_bounds)
 
             if prob > 90:
-                return start1, start2 - 1
+                # area_names_boundaries.append((start1, start2-1, prob))
+                new_bounds = (start1, start2-1, prob)
+                settle_possible_overlap(area_names_boundaries, new_bounds)
 
-    return -1, 0
+    return area_names_boundaries
+
+
+def settle_possible_overlap(area_names_boundaries, new_bound):
+    if len(area_names_boundaries) == 0:
+        area_names_boundaries.append(new_bound)
+        return
+
+    print(area_names_boundaries)
+    print(new_bound)
+
+    last_start, last_end, last_prob = area_names_boundaries.pop()
+    start, end, prob = new_bound
+
+    # The two boundaries overlap
+    if last_start < start < last_end:
+        if last_prob > prob:
+            area_names_boundaries.append((last_start, last_end, prob))
+        else:
+            area_names_boundaries.append((start, end, prob))
+    else:
+        area_names_boundaries.append((last_start, last_end, last_prob))
+        area_names_boundaries.append((start, end, prob))
 
 
 def replace_location_with_ner_marker(processed_post: str, area_names):
-    start, end = find_location_name(processed_post, area_names)
-    while start > 0:
-        old = processed_post[start:end]
+    area_names_boundaries = find_location_name(processed_post, area_names)
+
+    # As we keep replacing longer area names with shorter NER label, the
+    # entire list is essentially shifted downwards, hence the offset.
+    offset = 0
+    for start, end, _ in area_names_boundaries:
+        old = processed_post[start-offset:end-offset]
         processed_post = processed_post.replace(old, 'P_LOC')
 
-        start, end = find_location_name(processed_post, area_names)
+        offset = offset + (end - start) - len('P_LOC')
 
     return processed_post
 
@@ -82,6 +113,8 @@ def preprocess(post):
     # Add spaces around puctuation signs
     add_spaces = lambda ms: ' ' + processed_post[ms.start():ms.end()] + ' '
     processed_post, _ = re.compile(r'[-!&*\(\)/]').subn(add_spaces, processed_post, 100)
+
+    processed_post, _ = re.compile(r'\s{2,}').subn(lambda x: ' ', processed_post, 100)
 
     return processed_post
 
@@ -183,7 +216,7 @@ with open('training_data.txt', 'r', encoding='utf-16le') as file:
 
 i = 0
 with open('labeled_ner_training_data.txt', 'w', encoding='utf-16le') as file:
-    for post in [p for p in posts if len(p) > 2]:
+    for post in [p for p in posts[0:1] if len(p) > 2]:
         print(f'    {i}')
         i += 1
         processed_post    = preprocess(post)
