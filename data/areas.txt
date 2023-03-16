@@ -133,3 +133,6 @@ Unibo
 North-West University
 University
 Campus
+Town
+Mahikeng
+Mahikeng Town
