@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 def read_data(posts_file_name):
@@ -28,13 +30,14 @@ def label(post):
 
     return 'irrelevant'
 
+data_dir = '..\\data'
 
 # Read in the data
-posts = read_data('training_data.txt')
+posts = read_data(data_dir + '\\training_data.txt')
 
 labels = [label(p) for p in posts]
 
 df = pd.DataFrame({'posts': posts, 'label': labels})
 
 # Write the data to file
-df.to_csv('labeled_data.csv')
+df.to_csv(data_dir + '\\labeled_intent_detection_dataset.csv')
