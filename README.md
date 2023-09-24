@@ -33,16 +33,16 @@ Extract the location, property type and price from the post
 
 ## Workflow
 - Train intent recognition model,
-- Train named entity recognition model?,
+- Train named entity recognition model,
 - Service
     - Determine intent,
     - Extract features using NER,
-    - IF Perspective tenant:
-        - Search supplier DB
-        - IF Supplier not found: Add request to prospective tenant DB
+    - IF Prospective tenant:
+        - Search Supplier DB
+        - IF Supplier not found: Add request to Prospective Tenant DB
         - ELSE: Return supplier list
-    - IF property owner:
-        - Add supplier to DB
+    - IF Property owner:
+        - Add supplier to Supplier DB
 ## Tools
 - Python,
 - Rasa NLU,
