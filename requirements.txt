@@ -1,0 +1,9 @@
+tensorflow==2.10.0
+tensorflow_hub
+tensorflow-text==2.10.0
+Pillow
+numpy
+pandas
+seaborn
+scikit-learn
+emoji
