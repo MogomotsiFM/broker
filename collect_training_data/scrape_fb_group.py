@@ -1,5 +1,9 @@
+import datetime
+import os
 import sys
 import time
+
+from itertools import count
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -122,6 +126,7 @@ def scroll(driver, page_load_time, max_scrolls):
     # Get scroll height
     last_height = driver.execute_script("return document.body.scrollHeight")
 
+    retries = 0
     while max_scrolls > 0:
         print(f'Scroll: {max_scrolls}')
         # Scroll down to bottom
@@ -133,8 +138,13 @@ def scroll(driver, page_load_time, max_scrolls):
         # Calculate new scroll height and compare with last scroll height
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
-            # If heights are the same it will exit the function
-            break
+            if retries == 2:
+                # If heights are the same it will exit the function
+                break
+            retries = retries + 1
+        else:
+            retries = 0
+        
         last_height = new_height
 
         max_scrolls = max_scrolls - 1
@@ -154,29 +164,9 @@ def log_in(driver, e_mail, password):
         driver.find_element(by=By.XPATH, value='//*[@id="login_password_step_element"]/button').send_keys(Keys.ENTER)
 
 
-def fetch_fb_group_data(e_mail, password, group_id):
-    URL = "https://m.facebook.com/groups/" + GROUP_ID # + "/?sorting_setting=CHRONOLOGICAL"
-
-    # Setup the driver. This one uses firefox with some options and a path to the geckodriver
-    driver = webdriver.Chrome()#Firefox(options=options, executable_path='./geckodriver')
-    # implicitly_wait tells the driver to wait before throwing an exception
-    page_load_time = 60
-    driver.implicitly_wait(60)
-    # driver.set_page_load_timeout(page_load_time)
-    # driver.set_script_timeout(page_load_time)
-
-    # driver.get(url) opens the page
-    driver.get(f'https://m.facebook.com/login.php?next=https%3A%2F%2Fm.facebook.com%2Fgroups%2F{group_id}')
-
-    time.sleep(60)
-
-    # Log into facebook
-    log_in(driver, e_mail, password)
-
-    time.sleep(60)
-
+def fetch_group_data(driver):
     # This starts the scrolling by passing the driver and a timeout
-    scroll(driver, 30, 1500)
+    scroll(driver, 20, 1500)
     # Once scroll returns bs4 parsers the page_source
     # soup_a = BeautifulSoup(driver.page_source, 'lxml')
 
@@ -187,23 +177,53 @@ def fetch_fb_group_data(e_mail, password, group_id):
     return html
 
 
+def setup_browser_driver(url):
+    # Setup the driver. This one uses firefox with some options and a path to the geckodriver
+    driver = webdriver.Chrome()#Firefox(options=options, executable_path='./geckodriver')
+    # implicitly_wait tells the driver to wait before throwing an exception
+    # page_load_time = 60
+    driver.implicitly_wait(60)
+    # driver.set_page_load_timeout(page_load_time)
+    # driver.set_script_timeout(page_load_time)
+
+    # driver.get(url) opens the page
+    driver.get(url)
+
+    return driver
+
+
 if __name__ == '__main__':
     """
     Usage: python3 scrape_fb_group.py fb_username fb_password
     """
 
+    date = datetime.datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+
     if len(sys.argv) == 3:
         GROUP_ID = "353422322429171"
+        
         e_mail = sys.argv[1]
         password = sys.argv[2]
         print(f'Username: {e_mail}    password: {password}')
 
-        html = fetch_fb_group_data(e_mail, password, GROUP_ID)
+        url = f'https://m.facebook.com/login.php?next=https%3A%2F%2Fm.facebook.com%2Fgroups%2F{GROUP_ID}'
+        driver = setup_browser_driver(url)
+    
+        time.sleep(60)
+        log_in(driver, e_mail, password)
+        time.sleep(60)
 
+        html = fetch_group_data(driver)
+
+        output = os.path.join('..', 'data', f'scrolled_fb_{date}.html')
         with open('scrolled_fb2.html', 'w', encoding='utf-16le') as pg:
             pg.write(html.html)
+        with open(output, 'w', encoding='utf-16le') as pg:
+            pg.write(html.html)
     else:
-        with open('scrolled_fb.html', 'r', encoding='utf-16le') as file:
+        print('Loading html file.')
+        input = os.path.join('..', 'data', 'scrolled_fb_09-28-2023_09-54-29.html')
+        with open(input, 'r', encoding='utf-16le') as file:
             data = file.read()
             html = HTML(html=data)
 
@@ -212,20 +232,22 @@ if __name__ == '__main__':
 
     formater = lambda comment: ' '.join( comment.split('\n') ) + '\n'
 
-    with open('training_data.txt', 'w', encoding='utf-16le') as file:
+    training_data_file = os.path.join('..', 'data', f'training_data_{date}.txt')
+    with open(training_data_file, 'w', encoding='utf-16le') as file:
         reply_urls, posts, num_replies = extract_data(html)
         print(f'Posts: {len(posts)}    {len(reply_urls)}    {len(num_replies)}')
 
         file.writelines([p+'\n\n' for p in posts])
 
-        with open('replies_urls.txt', 'w', encoding='utf-16le') as f:
+        replies_file = os.path.join('..', 'data', f'replies_urls_{date}.txt')
+        with open(replies_file, 'w', encoding='utf-16le') as f:
             f.writelines([url+'\n\n' for url in reply_urls])
 
-        for count, url in zip(num_replies, reply_urls):
-            print('Another one...')
+        for count, url, idx in zip(num_replies, reply_urls, count(start=1)):
+            print(f'{idx} of {len(reply_urls)}')
             replies = extract_replies(session, url)
 
             file.writelines([r+'\n\n' for r in replies])
 
             # Sleep a time that is proportional to the number of comments
-            time.sleep(count/10)
+            time.sleep(count/20)
