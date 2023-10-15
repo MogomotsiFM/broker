@@ -1,0 +1,9 @@
+{"area": "setumo park", "description": "Signal Hill, Mahikeng, South Africa", "location": {"lat": -25.8211237, "lng": 25.6539512}, "name": "Signal Hill"}
+{"area": "ext 39", "location": {"lat": -25.835160055960646, "lng": 25.575108816656066}}
+{"area": "ciga", "location": {"lat": -25.835160055960646, "lng": 25.575108816656066}}
+{"area": "smarties", "location": {"lng": 25.62725583666224, "lat": -25.86049493575349}}
+{"area": "town", "description": "Mafikeng, South Africa", "location": {"lat": -25.860647, "lng": 25.6147337}, "name": "Mahikeng"}
+{"area": "stateng", "description": "Montshioa-Stadt, Mahikeng, South Africa", "location": {"lat": -25.872893, "lng": 25.6347128}, "name": "Montshioa-Stadt"}
+{"area": "university", "description": "North-West University - Science Building, Doctor Albert Luthuli road, Mmabatho Unit 5, Mmabatho, South Africa", "location": {"lat": -25.8244099, "lng": 25.6092312}, "name": "North-West University - Science Building"}
+{"area": "mmabana", "description": "103 Sekame St, Mmabatho Unit 4, Mahikeng, 2735, South Africa", "location": {"lat" : -25.8394851, "lng" : 25.6138019}, "name": "Mmabana Arts Culture & Sports Foundation"}
+ 
