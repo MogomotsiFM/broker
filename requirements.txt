@@ -1,3 +1,5 @@
+boto3
+googlemaps==4.10.0
 tensorflow==2.10.0
 tensorflow_hub
 tensorflow-text==2.10.0
