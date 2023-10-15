@@ -3,11 +3,10 @@ Golf View
 Imperial Reserve
 Imperial
 Leopard Park
-Liberatis
+Libertas
 Lomanyaneng
 Lonely Park
 Mafikeng Central
-Mafikeng Rural
 Majemantsho
 Mega City
 Makhubung
@@ -23,101 +22,48 @@ Unit 7
 Unit 8
 Unit 9
 Moletsamongwe
-Molopo
 Stadt
+Montshioa Stadt
+Montshiwa Stadt
 Montshiwa
-Ottoshoop
 Riviera Park
-Rooigrond Informal
 Setlopo
 Setumo Park
-Barolong Boo Ratshidi (10)
-Beakes Rest (10)
-Bethel (14)
-Bokone (10)
-Brooksby (10)
-Buffelsfontein (13)
-Buffelshoek (13)
 Dibate (10)
 Dihatshwane (13)
 Dithakong (10)
-Doornplaat (13)
-Duikersbos (14)
-Eastwood (14)
-Enselsrus (14)
-Goedgevonden (14)
 Golf View (4)
-Grootgeluk (14)
-Hartebeeslaagte (10)
-Heathview (14)
-Holland (14)
-Kaalpan (10)
-Kaalplaas (13)
-Kareebos (13)
-Kgamayasha (10)
-Kliparani (14)
-Klipplaat (13)
 Koikoi (10)
-Korhaanvlakte (14)
 Lekoko (10)
 Leopard Park (4)
-Leswanapark (13)
 Lokaleng (10)
 Lokung (10)
 Lomanyaneng (10)
-Lombaardslaagte (10)
 Lorwaneng (10)
 Lotlhakane (10)
 Lotlhakeng (10)
-Madiba (14)
-Madibe (14)
 Mafikeng Town (4)
 Magogoe (10)
 Majemantsho (10)
 Makhubung (10)
-Makouspan (10)
-Malmane Oog (13)
 Masutlhe (10)
 Matlhonyane (14)
 Mmanawane (10)
-Modimola (10)
 Mogosane (10)
 Molelwane (10)
 Moletsamongwe (10)
-Molopo Oog (13)
-Stadt (10)
-Unit 1
-Mooibos (14)
-Mooipan (10)
+Stateng (10)
 Morwatshetlha (14)
 Motlhabeng (10)
 Motsoseng (10)
-Naauwpoort (14)
-Oaklands (10)
-Ottoshoop (13)
-Paarden Vallei (13)
 Ramosadi (10)
-Ratau (10)
 Riviera Park (4)
-Rockyspruit (14)
 Rooigrond (13)
-Roosplaas (10)
-Sandkop (14)
-Schonewald (14)
-Schoongezicht (10)
-Seekoeivallei (13)
 Setlopo (10)
 Seweding (10)
-Soetdoring (14)
-Stinkhoutboom (13)
-Taolelo (14)
-Thelesho (14)
 The Crossing
-Thusong (14)
 Tlhabologo (10)
 Tloung (10)
-Trumpeter's Post (10)
-Tsetse (10)
 Tshunyane (14)
 Morena Mall
 Mafikeng Mall
@@ -136,3 +82,6 @@ Campus
 Town
 Mahikeng
 Mahikeng Town
+Montshiwa Unit 1
+Montshiwa Unit 2
+Top Village
