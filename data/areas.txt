@@ -68,9 +68,11 @@ Tshunyane (14)
 Morena Mall
 Mafikeng Mall
 Ext 39
+Ext 39 Rd (This road goes down the middle of Ext 39 and so we use it to determine the location of Ext 39 area)
 Montshioa
 Ciga
 Smarties
+One St (This road goes down the middle of Smarties and so we use it to determine the location of Smarties area)
 Signal Hill
 Mafikeng
 Imperial Reserve
@@ -85,3 +87,5 @@ Mahikeng Town
 Montshiwa Unit 1
 Montshiwa Unit 2
 Top Village
+Moshawane
+Phola
