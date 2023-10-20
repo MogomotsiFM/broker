@@ -1,9 +1,10 @@
-import itertools
 import json
 import os
 import re
-import copy
 from fuzzywuzzy import process, fuzz
+
+import logging
+logging.getLogger().setLevel(logging.ERROR)
 
 import pandas as pd
 
@@ -174,9 +175,6 @@ def replace_location_with_ner_marker_helper(list_of_words, area_names):
 
         found_area_name, prob = process.extractOne(' '.join(name), area_names, scorer=fuzz.ratio)
         
-        if name_start < len(words):
-            print(name, name_start, word_end, words[name_start])
-        
         if prob >= PROB_THRESHOLD:
             for _ in range(word_idx, name_start):
                 marked_posts.append(0)
@@ -215,7 +213,6 @@ def expand_units(processed_post: str):
     # unit 1,2,3 or 6 
     units_match = units_re.search(processed_post)
     if units_match is not None:
-        # print(f"Expand unit: {units_match.group('units')}")
         # Split on the separator
         raw_units = processed_post[units_match.start():units_match.end()]
 
@@ -254,11 +251,10 @@ def process_surounding_areas(processed_post, distance_matrix):
         start, end = seen.span()
         words = processed_post[end:].strip().lower().split(' ')
         words = [word.strip() for word in words if word != ' ']
-        print(words)
+        
         marked_words, matched_words = replace_location_with_ner_marker_helper(words, distance_matrix.keys())
 
         area_name = None
-        print(f"Matched: {matched_words}")
         if marked_words[0] == 'P_LOC':
             area_name = matched_words[0]
         elif len(marked_words) > 1 and marked_words[1]:
@@ -295,13 +291,10 @@ def label_posts(posts):
         post = row["posts"]
         label = row["label"]
 
-        if i>5: 
-            break
-
         print(f'    {i}: {post} : {label}')
         i += 1
 
-        if label == "tenant":
+        try:
             processed_post    = preprocess(post)
             processed_post, _ = property_re.subn('P_TYPE', processed_post, 100)
             processed_post, _ = price_re.subn('P_PRICE', processed_post, 100)
@@ -309,12 +302,17 @@ def label_posts(posts):
 
             processed_post = expand_units(processed_post)
             processed_post, _ = re.compile(r'[.,]').subn(lambda m: ' ' + processed_post[m.start():m.end()] + ' ', processed_post)
-            processed_post = process_surounding_areas(processed_post, distance_matrix)
+            if label == "tenant":
+                processed_post = process_surounding_areas(processed_post, distance_matrix)
+            
             print(processed_post)
             processed_post = replace_location_with_ner_marker(processed_post, area_names)
 
-        print(processed_post)
-        processed_posts.append(processed_post+'\n')
+            print(processed_post)
+            processed_posts.append(processed_post+'\n')
+        except Exception as exp:
+            print(post)
+            print(exp)
 
     return processed_posts
 
