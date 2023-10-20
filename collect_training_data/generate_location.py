@@ -155,7 +155,7 @@ for area in area_names:
 #   town == mafikeng
 #   stateng == stadt
 #   university == north west university
-#   setumo park == signal hill
+#   setumo park == motswedi street
 #   Ext 39 == "Ext 39 Rd"
 #   Siga  == "Ext 39 Rd"    // Siga is Ext 39
 #   Ext 38 == "One St"
@@ -165,7 +165,7 @@ area_mappings = {
     "mafikeng": ["town"],
     "stadt": ["stateng"],
     "north west university": ["university", "NWU"],
-    "signal hill": ["setumo park"],
+    "motswedi street": ["setumo park"],
     "ext 39 rd": ["ext 39", "siga", "ciga"],
     "one st": ["ext 38", "smarties"]
 }

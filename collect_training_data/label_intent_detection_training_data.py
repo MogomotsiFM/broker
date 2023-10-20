@@ -40,4 +40,5 @@ labels = [label(p) for p in posts]
 df = pd.DataFrame({'posts': posts, 'label': labels})
 
 # Write the data to file
-df.to_csv(data_dir + '\\labeled_intent_detection_dataset.csv')
+# df.to_csv(data_dir + '\\labeled_intent_detection_dataset.csv')
+df.to_csv(os.path.join('..', 'data', 'labeled_intent_detection_dataset.csv'))

@@ -23,9 +23,8 @@ Unit 8
 Unit 9
 Moletsamongwe
 Stadt
-Montshioa Stadt
-Montshiwa Stadt
-Montshiwa
+Montshioa Stadt (Montshioa)
+Montshiwa Stadt (Montshiwa)
 Riviera Park
 Setlopo
 Setumo Park
@@ -69,7 +68,6 @@ Morena Mall
 Mafikeng Mall
 Ext 39
 Ext 39 Rd (This road goes down the middle of Ext 39 and so we use it to determine the location of Ext 39 area)
-Montshioa
 Ciga
 Smarties
 One St (This road goes down the middle of Smarties and so we use it to determine the location of Smarties area)
@@ -89,3 +87,4 @@ Montshiwa Unit 2
 Top Village
 Moshawane
 Phola
+Motswedi Street (This road goes down the middle of Setumo Park and we use it to determine the location of the area)
