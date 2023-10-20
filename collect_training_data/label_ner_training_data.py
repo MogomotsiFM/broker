@@ -1,8 +1,11 @@
+import itertools
 import json
 import os
 import re
 import copy
 from fuzzywuzzy import process, fuzz
+
+import pandas as pd
 
 def get_area_names():
     area_names = set()
@@ -95,85 +98,102 @@ def replace_location_with_ner_marker2(processed_post, area_names):
 
 def replace_location_with_ner_marker(processed_post, area_names):
     words = processed_post.split(' ')
+    words = [word.strip() for word in words if not word in ['', ' ']]
 
     marked_post, _ = replace_location_with_ner_marker_helper(words, area_names)
-
-    return ' '.join(marked_post)
-
-
-def find_word(word, area_names):
-    if len(word) > 3:
-        found_word, prob = process.extractOne(word, area_names, scorer=fuzz.ratio)
-        print(f"Area?: {word}, Found: {found_word}, Probability: {prob}")
-        if prob > 80:
-            marked_word = 'P_LOC'
+    
+    insert_ner_marker = []
+    for mark, word in zip(marked_post, words):
+        if mark > 0:
+            insert_ner_marker.append(f'P_LOC{mark}')
         else:
-            marked_word = word
-            found_word = ' '
-    else:
-        marked_word = word
-        found_word = ' '
+            insert_ner_marker.append(word)
 
-    return marked_word, found_word
+    return ' '.join(insert_ner_marker)
+
+
+def find_area_name(words, start, area_names):
+    name = []
+    max_quality = -1
+    # The next word to read
+    word_idx = start
+    
+    name_start = start
+
+    # Keep adding words as long as the quality of our match is improving
+    while word_idx < len(words):
+        name.append(words[word_idx])
+
+        _, quality = process.extractOne(' '.join(name), area_names, scorer=fuzz.ratio)
+        
+        if quality > max_quality:
+            max_quality = quality
+
+            word_idx = word_idx + 1
+        else:
+            name.pop()
+
+            break
+
+    # Keep removing words at the begining as long as the quality of our match is improving
+    while len(name) > 0:
+        removed_name = name.pop(0)
+        name_start = name_start + 1
+
+        _, quality = process.extractOne(' '.join(name), area_names, scorer=fuzz.ratio)
+        
+        # If we try to remove a word and it does not affect the quality of our match the we remove it.
+        if quality == max_quality and len(removed_name) > 1:
+            name.insert(0, removed_name)
+            name_start = name_start - 1
+
+            break
+        if quality >= max_quality:
+            max_quality = quality
+        else:
+            name.insert(0, removed_name)
+            name_start = name_start - 1
+
+            break  
+
+    return name, name_start, word_idx
 
 
 def replace_location_with_ner_marker_helper(list_of_words, area_names):
-    marked_post = []
+    marked_posts = []
     found_words = []
 
     words = list_of_words
-    if len(words) == 1:
-        marked_word, matched_word = find_word(words[0], area_names)
-        marked_post.append(marked_word)
-        found_words.append(matched_word)
+    PROB_THRESHOLD = 90
 
-        return marked_post, found_words
+    print(words)
+    
+    word_idx = 0
+    while word_idx < len(words):
+        name, name_start, word_end = find_area_name(words, word_idx, area_names)
 
-
-    used_last_word = False
-    w2 = ''
-
-    for w1, w2 in zip(words, words[1:]):
-        if not used_last_word:
-            if not w1.isupper() and len(w1) + len(w2) > 3:
-                found_word1, prob = process.extractOne(w1, area_names, scorer=fuzz.ratio)
-
-                found_word2, prob2 = process.extractOne(' '.join([w1, w2]), area_names, scorer=fuzz.token_sort_ratio)
-
-                if prob2 > prob and prob2 > 80 and prob > 20:
-                    marked_post.append('P_LOC')
-                    marked_post.append('P_LOC')
-
-                    found_words.append(found_word2)
-                    
-                    used_last_word = True
-                elif prob > 80:
-                    marked_post.append('P_LOC')
-                    found_words.append(found_word1)
-
-                    used_last_word = False
-                else:
-                    marked_post.append(w1)
-                    found_words.append(' ')
-
-
-                    used_last_word = False
+        found_area_name, prob = process.extractOne(' '.join(name), area_names, scorer=fuzz.ratio)
         
-            else:
-                marked_post.append(w1)
+        if name_start < len(words):
+            print(name, name_start, word_end, words[name_start])
+        
+        if prob >= PROB_THRESHOLD:
+            for _ in range(word_idx, name_start):
+                marked_posts.append(0)
                 found_words.append(' ')
 
+            for idx, _ in enumerate(range(name_start, word_end), 1):
+                marked_posts.append(idx)
+                found_words.append(found_area_name)
         else:
-            used_last_word = False
+            for _ in range(word_idx, word_end):
+                marked_posts.append(0)
+                found_words.append(' ')
 
-    # Evaluate the last word by itself
-    if not used_last_word:
-        marked_word, matched_word = find_word(w2, area_names)
-        marked_post.append(marked_word)
-        found_words.append(matched_word)
+        word_idx = word_end
 
-    return marked_post, found_words
-
+    return marked_posts, found_words
+    
 
 def preprocess(post):
     processed_post = post.strip().lower()
@@ -224,7 +244,7 @@ def near(area):
 
 def process_surounding_areas(processed_post, distance_matrix):
     # near_re = re.compile(r'near((er)? to)?|around|(closer? to)|(walking distance to)')
-    near_re = re.compile(r'near((er)? to\s)?|(close(r){0, 1} (to\s)?)|(walking distance (to\s)?)')
+    near_re = re.compile(r'near(er)? (to\s)?|(close(r)? (to\s)?)|(walking distance (to\s)?)')
 
     seen = near_re.search(processed_post)
 
@@ -233,6 +253,7 @@ def process_surounding_areas(processed_post, distance_matrix):
         # Where to start searching
         start, end = seen.span()
         words = processed_post[end:].strip().lower().split(' ')
+        words = [word.strip() for word in words if word != ' ']
         print(words)
         marked_words, matched_words = replace_location_with_ner_marker_helper(words, distance_matrix.keys())
 
@@ -258,7 +279,7 @@ def process_surounding_areas(processed_post, distance_matrix):
 
             print(f"Area not found in distance matrix: {area_name}")
             return processed_post
-    
+
     return processed_post
 
 
@@ -270,27 +291,38 @@ def label_posts(posts):
     distance_matrix = load_distance_matrix()
 
     i = 1
-    for post in posts:
-        print(f'    {i}: {post}')
+    for _, row in posts.iterrows():
+        post = row["posts"]
+        label = row["label"]
+
+        if i>5: 
+            break
+
+        print(f'    {i}: {post} : {label}')
         i += 1
-        processed_post    = preprocess(post)
-        processed_post, _ = property_re.subn('P_TYPE', processed_post, 100)
-        processed_post, _ = price_re.subn('P_PRICE', processed_post, 100)
-        processed_post, _ = contacts_re.subn('P_TELL', processed_post, 100)
 
-        processed_post = expand_units(processed_post)
-        processed_post, _ = re.compile(r'[.,]').subn(lambda m: ' ' + processed_post[m.start():m.end()] + ' ', processed_post)
-        processed_post = process_surounding_areas(processed_post, distance_matrix)
-        processed_post = replace_location_with_ner_marker(processed_post, area_names)
+        if label == "tenant":
+            processed_post    = preprocess(post)
+            processed_post, _ = property_re.subn('P_TYPE', processed_post, 100)
+            processed_post, _ = price_re.subn('P_PRICE', processed_post, 100)
+            processed_post, _ = contacts_re.subn('P_TELL', processed_post, 100)
 
+            processed_post = expand_units(processed_post)
+            processed_post, _ = re.compile(r'[.,]').subn(lambda m: ' ' + processed_post[m.start():m.end()] + ' ', processed_post)
+            processed_post = process_surounding_areas(processed_post, distance_matrix)
+            print(processed_post)
+            processed_post = replace_location_with_ner_marker(processed_post, area_names)
+
+        print(processed_post)
         processed_posts.append(processed_post+'\n')
 
     return processed_posts
 
 
 def label_posts_for_ner_task(input_filename, output_filename):
-    with open(input_filename, 'r', encoding='utf-16le') as file:
-        posts = file.readlines()
+    # with open(input_filename, 'r', encoding='utf-16le') as file:
+    #    posts = file.readlines()
+    posts = pd.read_csv(input_filename)
 
     processed_posts = label_posts(posts)
 
@@ -383,5 +415,6 @@ if __name__ == '__main__':
     print(processed_post)
 
     label_posts_for_ner_task(
-        os.path.join('..', 'data', 'training_data.txt'), 
+        #os.path.join('..', 'data', 'training_data.txt'), 
+        os.path.join('..', 'data', 'labeled_intent_detection_dataset.csv'),
         os.path.join('..', 'data', 'labelled_ner_training_data.txt'))
